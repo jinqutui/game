@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0c0c1d">
+  <meta name="description" content="RPG英语闯关 - 趣味英语学习游戏">
+  <title>⚔️ RPG英语闯关</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* 加载屏幕 */
+    #loading-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #0c0c1d;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease;
+    }
+    #loading-screen.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .loading-title {
+      font-size: 2em;
+      font-weight: 900;
+      background: linear-gradient(135deg, #fdcb6e, #fd79a8, #a29bfe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 30px;
+    }
+    .loading-bar {
+      width: 200px;
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .loading-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #6c5ce7, #fd79a8);
+      border-radius: 3px;
+      animation: loadFill 1.5s ease forwards;
+    }
+    @keyframes loadFill {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- 加载屏幕 -->
+<div id="loading-screen">
+  <div class="loading-title">⚔️ RPG英语闯关</div>
+  <div class="loading-bar">
+    <div class="loading-fill"></div>
+  </div>
+</div>
+
+<!-- 游戏容器 -->
+<div id="game-container">
+
+  <!-- 粒子背景 -->
+  <div class="particles" id="particles"></div>
+
+  <!-- ====== 开始页面 ====== -->
+  <div id="start-screen" class="screen active">
+    <div class="hero-character">🧙‍♂️</div>
+    <div class="game-logo">RPG英语闯关</div>
+    <div class="game-subtitle">English Adventure RPG</div>
+    <div style="font-size: 0.8em; color: #a29bfe; margin-bottom: 30px; opacity: 0.6;">
+      Lv.<span id="player-level-display">1</span>
+    </div>
+    <button class="start-btn" id="start-btn">开始冒险 ⚔️</button>
+    <button class="continue-btn" id="continue-btn" style="display:none;">继续冒险 →</button>
+  </div>
+
+  <!-- ====== 主页面（章节选择） ====== -->
+  <div id="main-screen" class="screen">
+    <!-- 顶部信息栏 -->
+    <div class="main-header">
+      <div class="player-info">
+        <div class="player-avatar">🧙‍♂️</div>
+        <div class="player-stats">
+          <div class="player-name" id="player-name">勇者</div>
+          <div class="player-level" id="player-level-text">Lv.1</div>
+        </div>
+      </div>
+      <div class="header-buttons">
+        <button class="header-btn" id="shop-btn" title="商店">🛒</button>
+        <button class="header-btn" id="achievement-btn" title="成就">🏅</button>
+        <button class="header-btn" id="settings-btn" title="设置">⚙️</button>
+      </div>
+    </div>
+
+    <!-- 状态栏 -->
+    <div class="status-bar">
+      <div class="status-item">
+        <span class="emoji">❤️</span>
+        <span class="value" id="stat-hp">100</span>
+      </div>
+      <div class="status-item">
+        <span class="emoji">💰</span>
+        <span class="value" id="stat-gold">0</span>
+      </div>
+      <div class="status-item">
+        <span class="emoji">🧪</span>
+        <span class="value" id="stat-potions">3</span>
+      </div>
+      <div class="status-item">
+        <span class="emoji">⭐</span>
+        <span class="value" id="stat-stars">0</span>
+      </div>
+    </div>
+
+    <!-- 章节列表 -->
+    <div class="chapters-container" id="chapters-list">
+      <!-- 动态渲染 -->
+    </div>
+  </div>
+
+  <!-- ====== 章节详情页面 ====== -->
+  <div id="chapter-screen" class="screen">
+    <div class="chapter-header">
+      <button class="back-btn" data-back="main">←</button>
+      <div class="chapter-title-area">
+        <h2 id="chapter-detail-title">第1章</h2>
+        <p id="chapter-detail-subtitle">subtitle</p>
+      </div>
+    </div>
+    <div class="chapter-description" id="chapter-description">description</div>
+    <div class="stages-container" id="stages-list">
+      <!-- 动态渲染 -->
+    </div>
+  </div>
+
+  <!-- ====== 游戏页面（答题） ====== -->
+  <div id="game-screen" class="screen">
+    <!-- 顶部栏 -->
+    <div class="game-top-bar">
+      <button class="back-btn" data-back="chapter">←</button>
+      <div class="game-progress-info">
+        <div class="stage-name" id="game-stage-name">关卡名称</div>
+        <div class="question-count" id="game-question-count">1 / 5</div>
+      </div>
+      <button class="game-potions-btn" id="potions-btn" title="使用药水">
+        🧪
+        <span class="potion-count" id="potions-count">3</span>
+      </button>
+    </div>
+
+    <!-- 战斗区域 -->
+    <div class="battle-area" id="battle-area">
+      <!-- 动态渲染 -->
+    </div>
+
+    <!-- 玩家战斗信息 -->
+    <div class="player-area" id="player-fight-area" style="display:none; padding: 0 20px 10px;">
+      <div class="player-fight-avatar">🧙‍♂️</div>
+      <div class="player-hp-area">
+        <div class="player-hp-label">
+          <span>❤️ 生命值</span>
+          <span id="player-hp-text">100 / 100</span>
+        </div>
+        <div class="player-hp-bar">
+          <div class="player-hp-fill" id="player-hp-fill" style="width: 100%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 问题区域 -->
+    <div class="question-area" id="question-area">
+      <!-- 动态渲染 -->
+    </div>
+
+    <!-- 选项区域 -->
+    <div class="options-area" id="options-area">
+      <!-- 动态渲染 -->
+    </div>
+  </div>
+
+  <!-- ====== 结果页面 ====== -->
+  <div id="result-screen" class="screen">
+    <div id="result-content">
+      <!-- 动态渲染 -->
+    </div>
+  </div>
+
+  <!-- ====== 商店弹窗 ====== -->
+  <div class="modal-overlay" id="shop-modal">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-title">🛒 魔法商店</div>
+      <div style="text-align:center; font-size:0.85em; color: #fdcb6e; margin-bottom: 16px;">
+        💰 金币：<span id="shop-gold">0</span>
+      </div>
+      <div id="shop-list">
+        <!-- 动态渲染 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== 成就弹窗 ====== -->
+  <div class="modal-overlay" id="achievement-modal">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-title">🏅 成就</div>
+      <div id="achievement-list">
+        <!-- 动态渲染 -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== 设置弹窗 ====== -->
+  <div class="modal-overlay" id="settings-modal">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-title">⚙️ 设置</div>
+      <div style="padding: 16px;">
+        <button class="result-btn secondary" style="width:100%; margin-bottom: 12px;"
+          onclick="Game.resetProgress(); document.getElementById('settings-modal').classList.remove('active');">
+          🔄 重置进度
+        </button>
+        <div style="text-align:center; font-size:0.75em; color: rgba(255,255,255,0.4); margin-top: 20px;">
+          RPG英语闯关 v1.0<br>
+          专为儿童英语学习设计
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 脚本 -->
+<script src="data.js"></script>
+<script src="game.js"></script>
+
+<script>
+  // 加载完成后隐藏加载屏幕
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      const loading = document.getElementById('loading-screen');
+      loading.classList.add('hide');
+      setTimeout(() => loading.remove(), 500);
+    }, 1600);
+  });
+</script>
+
+</body>
+</html>
